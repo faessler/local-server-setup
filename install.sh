@@ -45,7 +45,7 @@ brew install jq
 
 
 # ============================= #
-# INSTALLING APACHE (HTTPD24)
+# APACHE INSTALLATION
 # ============================= #
 # SHUTDOWN AND STOP SYSTEM DELIVERED APACHE SERVER FROM AUTO-START
 sudo apachectl stop
@@ -62,3 +62,23 @@ sudo cp -v /usr/local/Cellar/httpd24/$apacheV/homebrew.mxcl.httpd24.plist /Libra
 sudo chown -v root:wheel /Library/LaunchDaemons/homebrew.mxcl.httpd24.plist
 sudo chmod -v 644 /Library/LaunchDaemons/homebrew.mxcl.httpd24.plist
 sudo launchctl load /Library/LaunchDaemons/homebrew.mxcl.httpd24.plist
+
+
+
+# ============================= #
+# APACHE CONFIGURATION
+# ============================= #
+# ADDING SITES DIRECTORY
+mkdir ~/Sites/
+
+# CHANGE DOCUMENT ROOT TO SITES
+sed -i -e 's|DocumentRoot "/usr/local/var/www/htdocs"|DocumentRoot /Users/'$usr'/Sites|g' /usr/local/etc/apache2/2.4/httpd.conf
+sed -i -e 's|<Directory "/usr/local/var/www/htdocs">|<Directory /Users/'$usr'/Sites>|g' /usr/local/etc/apache2/2.4/httpd.conf
+
+# TODO:
+# # AllowOverride controls what directives may be placed in .htaccess files.
+# # It can be "All", "None", or any combination of the keywords:
+# #   AllowOverride FileInfo AuthConfig Limit
+# #
+# AllowOverride None
+
