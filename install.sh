@@ -10,9 +10,9 @@
 
 
 
-# ============================= #
+# ================================= #
 # VARIABLES
-# ============================= #
+# ================================= #
 # FONT STYLES
 n=`tput sgr0` # normal
 b=`tput bold` # bold
@@ -26,9 +26,9 @@ usr=$USER
 
 
 
-# ============================= #
+# ================================= #
 # INSTALLING DEPENDENCIES
-# ============================= #
+# ================================= #
 # XCODE
 xcode-select --install
 echo Follow the Xcode guide and hit enter after installing it
@@ -56,9 +56,9 @@ brew install jq
 
 
 
-# ============================= #
+# ================================= #
 # APACHE INSTALLATION
-# ============================= #
+# ================================= #
 # SHUTDOWN AND STOP SYSTEM DELIVERED APACHE SERVER FROM AUTO-START
 sudo apachectl stop
 sudo launchctl unload -w /System/Library/LaunchDaemons/org.apache.httpd.plist 2>/dev/null
@@ -77,9 +77,9 @@ sudo launchctl load /Library/LaunchDaemons/homebrew.mxcl.httpd24.plist
 
 
 
-# ============================= #
+# ================================= #
 # MYSERVER STRUCTURE SETUP
-# ============================= #
+# ================================= #
 # CREATING MYSERVER DIR
 mkdir /Users/$usr/Documents/MyServer/
 
@@ -101,38 +101,102 @@ mkdir /Users/$usr/Documents/MyServer/php/
 
 
 
-# ============================= #
-# APACHE CONFIGURATION
-# ============================= #
-# CHANGE DOCUMENT ROOT TO SITES
-sed -ie 's|DocumentRoot "/usr/local/var/www/htdocs"|DocumentRoot /Users/'$usr'/Sites|g' /usr/local/etc/apache2/2.4/httpd.conf
-sed -ie 's|<Directory "/usr/local/var/www/htdocs">|<Directory /Users/'$usr'/Sites>|g' /usr/local/etc/apache2/2.4/httpd.conf
+# ================================= #
+# APACHE CONFIGURATION / OVERRIDE
+# ================================= #
+# SET DOCUMENT ROOT TO SITES
+cat <<EOF >> /Users/$usr/Documents/MyServer/apache2/httpd.conf
+#
+# DocumentRoot: The directory out of which you will serve your
+# documents. By default, all requests are taken from this directory, but
+# symbolic links and aliases may be used to point to other locations.
+#
+DocumentRoot /Users/$usr/Sites
+<Directory /Users/$usr/Sites>
+    #
+    # Possible values for the Options directive are "None", "All",
+    # or any combination of:
+    #   Indexes Includes FollowSymLinks SymLinksifOwnerMatch ExecCGI MultiViews
+    #
+    # Note that "MultiViews" must be named *explicitly* --- "Options All"
+    # doesn't give it to you.
+    #
+    # The Options directive is both complicated and important.  Please see
+    # http://httpd.apache.org/docs/2.4/mod/core.html#options
+    # for more information.
+    #
+    Options Indexes FollowSymLinks
 
-# TODO:
-# # AllowOverride controls what directives may be placed in .htaccess files.
-# # It can be "All", "None", or any combination of the keywords:
-# #   AllowOverride FileInfo AuthConfig Limit
-# #
-# AllowOverride None
+    #
+    # AllowOverride controls what directives may be placed in .htaccess files.
+    # It can be "All", "None", or any combination of the keywords:
+    #   AllowOverride FileInfo AuthConfig Limit
+    #
+    AllowOverride All
 
-# ENABLE MOD REWRITE
-sed -ie 's|#LoadModule rewrite_module libexec/mod_rewrite.so|LoadModule rewrite_module libexec/mod_rewrite.so|g' /usr/local/etc/apache2/2.4/httpd.conf
-
-# USER AND GROUP
-sed -ie 's|User daemon|User '$usr'|g' /usr/local/etc/apache2/2.4/httpd.conf
-sed -ie 's|Group daemon|Group staff|g' /usr/local/etc/apache2/2.4/httpd.conf
-
-# SERVER NAME
-sed -ie 's|#ServerName www.example.com:80|ServerName localhost|g' /usr/local/etc/apache2/2.4/httpd.conf
-
-# SITES FOLDER
-mkdir ~/Sites
+    #
+    # Controls who can get stuff from this server.
+    #
+    Require all granted
+</Directory>
 
 
+EOF
 
-# ============================= #
+# LOAD MODULES
+cat <<EOF >> /Users/$usr/Documents/MyServer/apache2/httpd.conf
+#
+# Dynamic Shared Object (DSO) Support
+#
+# To be able to use the functionality of a module which was built as a DSO you
+# have to place corresponding `LoadModule' lines at this location so the
+# directives contained in it are actually available _before_ they are used.
+# Statically compiled modules (those listed by `httpd -l') do not need
+# to be loaded here.
+#
+# Example:
+# LoadModule foo_module modules/mod_foo.so
+#
+LoadModule rewrite_module libexec/mod_rewrite.so
+
+
+EOF
+
+# SET USER AND GROUP
+cat <<EOF >> /Users/$usr/Documents/MyServer/apache2/httpd.conf
+#
+# If you wish httpd to run as a different user or group, you must run
+# httpd as root initially and it will switch.
+#
+# User/Group: The name (or #number) of the user/group to run httpd as.
+# It is usually good practice to create a dedicated user and group for
+# running httpd, as with most system services.
+#
+User $usr
+Group staff
+
+
+EOF
+
+# SET SERVERNAME TO LOCALHOST
+cat <<EOF >> /Users/$usr/Documents/MyServer/apache2/httpd.conf
+#
+# ServerName gives the name and port that the server uses to identify itself.
+# This can often be determined automatically, but we recommend you specify
+# it explicitly to prevent problems during startup.
+#
+# If your host doesn't have a registered DNS name, enter its IP address here.
+#
+ServerName localhost:80
+
+
+EOF
+
+
+
+# ================================= #
 # PHP INSTALLATION
-# ============================= #
+# ================================= #
 # UNLINK EXISTING PHP
 brew unlink php53 2>/dev/null
 brew unlink php54 2>/dev/null
@@ -167,9 +231,9 @@ done
 
 
 
-# ============================= #
+# ================================= #
 # APACHE PHP SETUP - PART 1
-# ============================= #
+# ================================= #
 # REMOVE LOAD PHP MODULES
 for i in "${phpVersions[@]}"
 do
@@ -189,9 +253,9 @@ done
 
 
 
-# ============================= #
+# ================================= #
 # PHP SWITCHER SCRIPT
-# ============================= #
+# ================================= #
 # INSTALLING SPHP
 curl -L https://gist.github.com/w00fz/142b6b19750ea6979137b963df959d11/raw > /usr/local/bin/sphp
 chmod +x /usr/local/bin/sphp
