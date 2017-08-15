@@ -95,7 +95,7 @@ touch /Users/$usr/Documents/MyServer/apache2/httpd.conf
 
 # INCLUDING CUSTOM OVERRIDE HTTPD CONF
 if ! grep -q "Include /Users/$usr/Documents/MyServer/apache2/httpd.conf" /usr/local/etc/apache2/2.4/httpd.conf; then
-    echo -e "\n\n# Including custom conf file\nInclude /Users/$usr/Documents/MyServer/apache2/httpd.conf" >> /usr/local/etc/apache2/2.4/httpd.conf
+    echo -e "\n\n# Including custom conf file\nInclude /Users/$usr/Documents/MyServer/apache2/httpd.conf\n\n\n" >> /usr/local/etc/apache2/2.4/httpd.conf
 fi
 
 # CREATING PHP DIR
@@ -212,6 +212,7 @@ cat <<EOF >> /Users/$usr/Documents/MyServer/apache2/httpd.conf
 ServerName localhost:80
 
 
+
 EOF
 
 
@@ -280,10 +281,17 @@ chmod +x /usr/local/bin/sphp
 # export PATH=/usr/local/bin:/usr/local/sbin:$PATH
 
 # APACHE PHP SETUP FOR SPHP
-# TODO:
-## Brew PHP LoadModule for `sphp` switcher
-#LoadModule php5_module /usr/local/lib/libphp5.so
-##LoadModule php7_module /usr/local/lib/libphp7.so
+if ! grep -q "# Brew PHP LoadModule for \`sphp\` switcher" /usr/local/etc/apache2/2.4/httpd.conf; then
+cat <<EOF >> /usr/local/etc/apache2/2.4/httpd.conf
+# Brew PHP LoadModule for \`sphp\` switcher
+LoadModule php5_module /usr/local/lib/libphp5.so
+#LoadModule php7_module /usr/local/lib/libphp7.so
+
+
+
+EOF
+fi
+
 
 # SWITCHING PHP
 sphp ${phpVersions[${#phpVersions[@]}-1]}
