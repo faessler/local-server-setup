@@ -81,23 +81,25 @@ sudo launchctl load /Library/LaunchDaemons/homebrew.mxcl.httpd24.plist
 # MYSERVER STRUCTURE SETUP
 # ================================= #
 # CREATING MYSERVER DIR
-mkdir /Users/$usr/Documents/MyServer/
+mkdir -p /Users/$usr/Documents/MyServer
 
 # ADDING & LINKING SITES
-mkdir /Users/$usr/Sites/
-ln -s /Users/$usr/Sites/ /Users/$usr/Documents/MyServer/Sites/
+mkdir -p /Users/$usr/Sites
+ln -sf /Users/$usr/Sites /Users/$usr/Documents/MyServer/Sites
 
 # CREATING APACHE2 DIR
-mkdir /Users/$usr/Documents/MyServer/apache2/
+mkdir -p /Users/$usr/Documents/MyServer/apache2
 
 # ADDING CUSTOM HTTPD CONF FILE
 touch /Users/$usr/Documents/MyServer/apache2/httpd.conf
 
-# INCLUDING CUSTOM HTTPD CONF
-echo -e "\n\n# Including custom conf file\nInclude /Users/$usr/Documents/MyServer/apache2/httpd.conf" >> /usr/local/etc/apache2/2.4/httpd.conf
+# INCLUDING CUSTOM OVERRIDE HTTPD CONF
+if ! grep -q "Include /Users/$usr/Documents/MyServer/apache2/httpd.conf" /usr/local/etc/apache2/2.4/httpd.conf; then
+    echo -e "\n\n# Including custom conf file\nInclude /Users/$usr/Documents/MyServer/apache2/httpd.conf" >> /usr/local/etc/apache2/2.4/httpd.conf
+fi
 
 # CREATING PHP DIR
-mkdir /Users/$usr/Documents/MyServer/php/
+mkdir -p /Users/$usr/Documents/MyServer/php
 
 
 
@@ -197,6 +199,9 @@ EOF
 # ================================= #
 # PHP INSTALLATION
 # ================================= #
+# SET PHP VERSIONS TO INSTALL
+phpVersions=("55" "56" "70" "71")
+
 # UNLINK EXISTING PHP
 brew unlink php53 2>/dev/null
 brew unlink php54 2>/dev/null
@@ -206,7 +211,6 @@ brew unlink php70 2>/dev/null
 brew unlink php71 2>/dev/null
 
 # INSTALL PHP VERSION FROM ARRAY
-phpVersions=("55" "56" "70" "71")
 for i in "${phpVersions[@]}"
 do
 	if ! [ "$(brew ls --versions php$i)" ];
@@ -232,7 +236,7 @@ done
 
 
 # ================================= #
-# APACHE PHP SETUP - PART 1
+# APACHE PHP SETUP
 # ================================= #
 # REMOVE LOAD PHP MODULES
 for i in "${phpVersions[@]}"
@@ -241,15 +245,22 @@ do
     sed -ie 's|LoadModule php'${i:0:1}'_module        /usr/local/Cellar/php'$i'/'$phpVersion'/libexec/apache2/libphp'${i:0:1}'.so||g' /usr/local/etc/apache2/2.4/httpd.conf
 done
 
-# DIRECTORY INDEXES FOR PHP
-# TODO:
-#<IfModule dir_module>
-#    DirectoryIndex index.php index.html
-#</IfModule>
+# OVERRIDE DIRECTORY INDEXES FOR PHP
+# SET SERVERNAME TO LOCALHOST
+cat <<EOF >> /Users/$usr/Documents/MyServer/apache2/httpd.conf
 #
-#<FilesMatch \.php$>
-#    SetHandler application/x-httpd-php
-#</FilesMatch>
+# DirectoryIndex: sets the file that Apache will serve if a directory
+# is requested.
+#
+<IfModule dir_module>
+    DirectoryIndex index.html index.php
+</IfModule>
+<FilesMatch \.php$>
+    SetHandler application/x-httpd-php
+</FilesMatch>
+
+
+EOF
 
 
 
