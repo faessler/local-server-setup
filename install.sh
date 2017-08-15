@@ -78,14 +78,35 @@ sudo launchctl load /Library/LaunchDaemons/homebrew.mxcl.httpd24.plist
 
 
 # ============================= #
+# MYSERVER STRUCTURE SETUP
+# ============================= #
+# CREATING MYSERVER DIR
+mkdir /Users/$usr/Documents/MyServer/
+
+# ADDING & LINKING SITES
+mkdir /Users/$usr/Sites/
+ln -s /Users/$usr/Sites/ /Users/$usr/Documents/MyServer/Sites/
+
+# CREATING APACHE2 DIR
+mkdir /Users/$usr/Documents/MyServer/apache2/
+
+# ADDING CUSTOM HTTPD CONF FILE
+touch /Users/$usr/Documents/MyServer/apache2/httpd.conf
+
+# INCLUDING CUSTOM HTTPD CONF
+echo -e "\n\n# Including custom conf file\nInclude /Users/$usr/Documents/MyServer/apache2/httpd.conf" >> /usr/local/etc/apache2/2.4/httpd.conf
+
+# CREATING PHP DIR
+mkdir /Users/$usr/Documents/MyServer/php/
+
+
+
+# ============================= #
 # APACHE CONFIGURATION
 # ============================= #
-# ADDING SITES DIRECTORY
-mkdir ~/Sites/
-
 # CHANGE DOCUMENT ROOT TO SITES
-sed -i -e 's|DocumentRoot "/usr/local/var/www/htdocs"|DocumentRoot /Users/'$usr'/Sites|g' /usr/local/etc/apache2/2.4/httpd.conf
-sed -i -e 's|<Directory "/usr/local/var/www/htdocs">|<Directory /Users/'$usr'/Sites>|g' /usr/local/etc/apache2/2.4/httpd.conf
+sed -ie 's|DocumentRoot "/usr/local/var/www/htdocs"|DocumentRoot /Users/'$usr'/Sites|g' /usr/local/etc/apache2/2.4/httpd.conf
+sed -ie 's|<Directory "/usr/local/var/www/htdocs">|<Directory /Users/'$usr'/Sites>|g' /usr/local/etc/apache2/2.4/httpd.conf
 
 # TODO:
 # # AllowOverride controls what directives may be placed in .htaccess files.
@@ -95,14 +116,14 @@ sed -i -e 's|<Directory "/usr/local/var/www/htdocs">|<Directory /Users/'$usr'/Si
 # AllowOverride None
 
 # ENABLE MOD REWRITE
-sed -i -e 's|#LoadModule rewrite_module libexec/mod_rewrite.so|LoadModule rewrite_module libexec/mod_rewrite.so|g' /usr/local/etc/apache2/2.4/httpd.conf
+sed -ie 's|#LoadModule rewrite_module libexec/mod_rewrite.so|LoadModule rewrite_module libexec/mod_rewrite.so|g' /usr/local/etc/apache2/2.4/httpd.conf
 
 # USER AND GROUP
-sed -i -e 's|User daemon|User '$usr'|g' /usr/local/etc/apache2/2.4/httpd.conf
-sed -i -e 's|Group daemon|Group staff|g' /usr/local/etc/apache2/2.4/httpd.conf
+sed -ie 's|User daemon|User '$usr'|g' /usr/local/etc/apache2/2.4/httpd.conf
+sed -ie 's|Group daemon|Group staff|g' /usr/local/etc/apache2/2.4/httpd.conf
 
 # SERVER NAME
-sed -i -e 's|#ServerName www.example.com:80|ServerName localhost|g' /usr/local/etc/apache2/2.4/httpd.conf
+sed -ie 's|#ServerName www.example.com:80|ServerName localhost|g' /usr/local/etc/apache2/2.4/httpd.conf
 
 # SITES FOLDER
 mkdir ~/Sites
@@ -153,7 +174,7 @@ done
 for i in "${phpVersions[@]}"
 do
     phpVersion=`brew info --json=v1 php$i | jq ".[] | .installed | .[] | .version" | tr -d '"'`
-    sed -i -e 's|LoadModule php'${i:0:1}'_module        /usr/local/Cellar/php'$i'/'$phpVersion'/libexec/apache2/libphp'${i:0:1}'.so||g' /usr/local/etc/apache2/2.4/httpd.conf
+    sed -ie 's|LoadModule php'${i:0:1}'_module        /usr/local/Cellar/php'$i'/'$phpVersion'/libexec/apache2/libphp'${i:0:1}'.so||g' /usr/local/etc/apache2/2.4/httpd.conf
 done
 
 # DIRECTORY INDEXES FOR PHP
