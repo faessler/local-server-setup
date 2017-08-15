@@ -143,6 +143,24 @@ DocumentRoot /Users/$usr/Sites
 </Directory>
 
 
+
+EOF
+
+# OVERRIDE DIRECTORY INDEXES FOR PHP
+cat <<EOF >> /Users/$usr/Documents/MyServer/apache2/httpd.conf
+#
+# DirectoryIndex: sets the file that Apache will serve if a directory
+# is requested.
+#
+<IfModule dir_module>
+    DirectoryIndex index.html index.php
+</IfModule>
+<FilesMatch \.php$>
+    SetHandler application/x-httpd-php
+</FilesMatch>
+
+
+
 EOF
 
 # LOAD MODULES
@@ -151,15 +169,16 @@ cat <<EOF >> /Users/$usr/Documents/MyServer/apache2/httpd.conf
 # Dynamic Shared Object (DSO) Support
 #
 # To be able to use the functionality of a module which was built as a DSO you
-# have to place corresponding `LoadModule' lines at this location so the
+# have to place corresponding LoadModule lines at this location so the
 # directives contained in it are actually available _before_ they are used.
-# Statically compiled modules (those listed by `httpd -l') do not need
+# Statically compiled modules (those listed by httpd -l) do not need
 # to be loaded here.
 #
 # Example:
 # LoadModule foo_module modules/mod_foo.so
 #
 LoadModule rewrite_module libexec/mod_rewrite.so
+
 
 
 EOF
@@ -176,6 +195,7 @@ cat <<EOF >> /Users/$usr/Documents/MyServer/apache2/httpd.conf
 #
 User $usr
 Group staff
+
 
 
 EOF
@@ -244,23 +264,6 @@ do
     phpVersion=`brew info --json=v1 php$i | jq ".[] | .installed | .[] | .version" | tr -d '"'`
     sed -ie 's|LoadModule php'${i:0:1}'_module        /usr/local/Cellar/php'$i'/'$phpVersion'/libexec/apache2/libphp'${i:0:1}'.so||g' /usr/local/etc/apache2/2.4/httpd.conf
 done
-
-# OVERRIDE DIRECTORY INDEXES FOR PHP
-# SET SERVERNAME TO LOCALHOST
-cat <<EOF >> /Users/$usr/Documents/MyServer/apache2/httpd.conf
-#
-# DirectoryIndex: sets the file that Apache will serve if a directory
-# is requested.
-#
-<IfModule dir_module>
-    DirectoryIndex index.html index.php
-</IfModule>
-<FilesMatch \.php$>
-    SetHandler application/x-httpd-php
-</FilesMatch>
-
-
-EOF
 
 
 
