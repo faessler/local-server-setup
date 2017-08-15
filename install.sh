@@ -269,7 +269,7 @@ done
 
 
 # ================================= #
-# PHP SWITCHER SCRIPT
+# PHP SWITCHER
 # ================================= #
 # INSTALLING SPHP
 curl -L https://gist.github.com/w00fz/142b6b19750ea6979137b963df959d11/raw > /usr/local/bin/sphp
@@ -292,6 +292,27 @@ LoadModule php5_module /usr/local/lib/libphp5.so
 EOF
 fi
 
-
 # SWITCHING PHP
 sphp ${phpVersions[${#phpVersions[@]}-1]}
+
+
+
+# ================================= #
+# INSTALLING PHP OPCACHE AND APCU
+# ================================= #
+for i in "${phpVersions[@]}"
+do
+    sphp $i
+    if ! [ "$(brew ls --versions php$i-opcache)" ];
+    then
+	    brew install php$i-opcache
+    else
+        brew reinstall php$i-opcache
+	fi
+	if ! [ "$(brew ls --versions php$i-apcu)" ];
+    then
+	    brew install php$i-apcu
+    else
+        brew reinstall php$i-apcu
+	fi
+done
