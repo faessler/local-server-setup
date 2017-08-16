@@ -316,3 +316,29 @@ do
         brew reinstall php$i-apcu
 	fi
 done
+
+
+
+# ================================= #
+# MYSQL
+# ================================= #
+# STOP RUNNING MYSQL SERVER
+sudo mysqld stop
+sudo mysql.server stop
+
+# REMOVE DEFAULT MAC PORTS
+sudo launchctl unload -w /Library/LaunchDaemons/org.macports.mysql.plist
+sudo launchctl load -w /Library/LaunchDaemons/org.macports.mysql.plist
+
+# INSTALL MYSQL
+brew install mysql
+
+# SET HOMEBREW MYSQL AS DEFAULT
+ln -sfv /usr/local/opt/mysql/*.plist ~/Library/LaunchAgents
+launchctl load ~/Library/LaunchAgents/homebrew.mxcl.mysql.plist
+
+# SECURE MYSQL INSTALLATION
+mysql_secure_installation
+
+# START MYSQL SERVER
+mysql.server start
