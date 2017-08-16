@@ -37,8 +37,7 @@ read
 # CHECK IF HOMEBREW IS INSTALLED
 if ! which brew &>/dev/null
 then
-  echo ERROR: Homebrew is not installed! Please install Homebrew first to run this bashscript.
-  exit 1
+  /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 fi
 
 # UPDATE HOMEBREW
@@ -342,3 +341,20 @@ mysql_secure_installation
 
 # START MYSQL SERVER
 mysql.server start
+
+
+
+# ================================= #
+# PHPMYADMIN
+# ================================= #
+# INSTALL PHPMYADMIN
+mkdir /Users/$usr/Documents/MyServer/phpMyAdmin
+wget -P /Users/$usr/Documents/MyServer/phpMyAdmin/ https://files.phpmyadmin.net/phpMyAdmin/4.7.3/phpMyAdmin-4.7.3-all-languages.tar.gz
+tar -xvf /Users/$usr/Documents/MyServer/phpMyAdmin/phpMyAdmin-4.7.3-all-languages.tar.gz -C /Users/$usr/Documents/MyServer/phpMyAdmin/ --strip-components=1
+rm /Users/$usr/Documents/MyServer/phpMyAdmin/phpMyAdmin-4.7.3-all-languages.tar.gz
+
+# CREATE LINK FROM SITES
+ln -s /Users/$usr/Documents/MyServer/phpMyAdmin /Users/$usr/Sites/_phpMyAdmin
+
+# CREATE VHOST FOR PHPMYADMIN
+# TODO
